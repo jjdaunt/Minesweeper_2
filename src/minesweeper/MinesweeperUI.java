@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
@@ -30,12 +32,11 @@ public class MinesweeperUI extends JFrame {
 	
 	private void initUI(){
 		setTitle("MINESWEEPER");
-		setSize(1000,500);
+		setSize(750,650);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		Container contentPane = getContentPane();
-		GridLayout layout = new GridLayout(playercount,2);
-		contentPane.setLayout(layout);
+		contentPane.setLayout(new GridBagLayout());
 		contentPane.setBackground(Color.BLACK);
 		
 		Vector<String> players = new Vector<String>(1,1);
@@ -86,34 +87,60 @@ public class MinesweeperUI extends JFrame {
 		// Ensure a perfectly even colour distribution.
 		shots = playercount * rounds;
 		int offset = shots % colours;
-		if (offset != 0) shots += (colours - offset);
+		//if (offset != 0) shots += (colours - offset); // Old mode: disabled
+		if (offset != 0) { // Patch: assume extras added to keep all rows even.
+			shots += colours;
+			offset = 0;
+		}
 		
+		// TODO: Some way to select desired mode of handling.
 		for (int i = 0; i < colours; i++) {
 			colourcounts.add(shots / colours);
-			// This might not be the best offset handling.
+			// This might not be the best offset handling. Old mode: disabled
 			// TODO: Set offset colours after setup, from dropdown?
-			if (offset > 0){
+			/*if (offset > 0){
 				colourcounts.set(i,colourcounts.get(i)+1);
 				offset--;
-			}
+			}*/
 		}
+		
+		// Style: Player Labels
+		GridBagConstraints pl = new GridBagConstraints();
+		pl.fill = GridBagConstraints.BOTH;
+		pl.gridy = 0;
+		pl.weightx = 0.8;
+		pl.weighty = 0.5;
+		pl.insets = new Insets(5, 0, 5, 20);
+		pl.gridwidth = 2;
+		pl.anchor = GridBagConstraints.WEST;
+		// Style: Info Labels
+		GridBagConstraints il = new GridBagConstraints();
+		il.gridy = 0;
+		il.weightx = 0.4;
+		il.weighty = 0.5;
+		il.insets = new Insets(5, 0, 5, 25);
+		il.gridwidth = 1;
+		il.anchor = GridBagConstraints.EAST;
 		
 		/// SETUP OVER ///
 		for (int i = 0; i < playercount; i++){
 			playerLabels.add(new JLabel(players.get(i)));
 			infoLabels.add(new JLabel("0"));
 			playerLabels.get(i).setForeground(Color.WHITE);
-			playerLabels.get(i).setFont(new Font("Arial", Font.PLAIN, 42));
+			playerLabels.get(i).setFont(new Font("Arial", Font.PLAIN, 60));
+			playerLabels.get(i).setHorizontalAlignment(JLabel.RIGHT);
 			infoLabels.get(i).setForeground(Color.WHITE);
-			infoLabels.get(i).setFont(new Font("Arial", Font.PLAIN, 42));
-			contentPane.add(playerLabels.get(i));
-			contentPane.add(infoLabels.get(i));
+			infoLabels.get(i).setFont(new Font("Arial", Font.PLAIN, 60));
+			contentPane.add(playerLabels.get(i), pl);
+			contentPane.add(infoLabels.get(i), il);
+			pl.gridy++;
+			il.gridy++;
 		}
 		JLabel blank = new JLabel("");
 		JButton nextRound = new JButton("Start Game");
-		// TODO: Sizing button
-		contentPane.add(blank);
-		contentPane.add(nextRound);
+		nextRound.setFont(new Font("Arial", Font.PLAIN, 32));
+		contentPane.add(blank, pl);
+		contentPane.add(nextRound, il);
 		
 		firstPlayer = playerLabels.get(randInt(0,playercount-1)).getText();
 
@@ -121,6 +148,7 @@ public class MinesweeperUI extends JFrame {
 			public void actionPerformed(ActionEvent e){
 				nextRound.setText("Next Round");
 				round++;
+				if (round == rounds) nextRound.setText("Game Over");
 				if (round > rounds) System.exit(0);
 				int playercolour = -1;	
 				// Get new rolls
@@ -136,8 +164,6 @@ public class MinesweeperUI extends JFrame {
 							int t = rolls[j];
 							rolls[j] = rolls[j+1];
 							rolls[j+1] = t;
-							//if (j == first) first = j+1;
-							//else if (j+1 == first) first = j;
 							String x = playerLabels.get(j).getText();
 							playerLabels.get(j).setText(playerLabels.get(j+1).getText());
 							playerLabels.get(j+1).setText(x);

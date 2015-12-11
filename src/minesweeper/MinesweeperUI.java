@@ -25,6 +25,7 @@ public class MinesweeperUI extends JFrame {
 	public static int rounds;
 	public static int colours;
 	public static int shots;
+	public static int fontsize;
 	public String firstPlayer;
 	int round = 0;
 	public static Color[] colournames = {Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.ORANGE, Color.WHITE};
@@ -32,8 +33,6 @@ public class MinesweeperUI extends JFrame {
 	
 	private void initUI(){
 		setTitle("MINESWEEPER");
-		setSize(750,650);
-		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new GridBagLayout());
@@ -61,6 +60,10 @@ public class MinesweeperUI extends JFrame {
 			players.add(JOptionPane.showInputDialog(this, "Player " + (i+1) + "'s name?", "Player Name", JOptionPane.PLAIN_MESSAGE));
 			if (players.get(i) == null) System.exit(0);
 		}
+		
+		fontsize = 72 - (playercount * 2);
+		setSize(750,100 + playercount * (fontsize + 20));
+		setLocationRelativeTo(null);
 		
 		while (rounds < 1){
 			String str = JOptionPane.showInputDialog(this, "Enter round count: ", "Rounds", JOptionPane.PLAIN_MESSAGE);
